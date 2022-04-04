@@ -3,6 +3,7 @@ package org.example;
 import org.junit.Test;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 
 public class AppTestPost {
@@ -98,6 +99,43 @@ public class AppTestPost {
                 .and()
                 .body("cuisine", is("Mediterranean"));
     }
+    @Test
+    public void post4() {
+        given()
+                .queryParam("language", "en")
+                .queryParam("apiKey", apiKey)
+                .body("{\n"
+                        + " \"ingredients\": [ \n"
+                        + "         \"2 apples\",\n"
+                        + "        \"1 cup cheese\",\n"
+                        + "        \"1 glasses of wine\",\n"
+                        + " ], \n"
+                        + "}")
+                .when()
+                .post("https://api.spoonacular.com/food/ingredients/glycemicLoad")
+                .then()
+                .assertThat()
+                .statusCode(200)
+                .and()
+                .body("status", is("success"));
 
-
+    }
+@Test
+    public void post5Negative(){
+given()
+        .queryParam("apiKey", apiKey)
+        .queryParam("locale", "en_US")
+        .body( "[ \n"
+                + " { \n"
+                + " \"title\": \"Kroger Vitamin A & D Reduced Fat 2% Milk\" , \n"
+                + " \"upc\": \" \", \n"
+                + " \"plu_code\": \" \", \n"
+                + " },\n"
+        + "]")
+        .when()
+        .post("https://api.spoonacular.com/food/products/classify1Batch")
+        .then()
+        .assertThat()
+        .statusCode(405);
+   }
 }
