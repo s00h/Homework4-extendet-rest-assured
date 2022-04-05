@@ -10,7 +10,7 @@ public class AppTestPost {
     private final String apiKey = "403374500dbd4d1bb8587033294d5bad";
 
     @Test
-    public void post1() {
+    public void postMealplannerItems() {
         String id = given()
                 .queryParam("hash", "dc9601b2a37227f264b53fe6bfe8261d1415f14d")
                 .queryParam("apiKey", apiKey)
@@ -48,7 +48,7 @@ public class AppTestPost {
     }
 
     @Test
-    public void post2() {
+    public void postRecipesAnalyze() {
         given()
                 .queryParam("language", "en")
                 .queryParam("includeNutrition", "false")
@@ -76,7 +76,7 @@ public class AppTestPost {
     }
 
     @Test
-    public void post3() {
+    public void postRecipesCuisine() {
         given()
                 .queryParam("title", "Pork roast with green beans")
                 .queryParam("ingredientList", "3 oz pork shoulder")
@@ -100,7 +100,7 @@ public class AppTestPost {
                 .body("cuisine", is("Mediterranean"));
     }
     @Test
-    public void post4() {
+    public void postFoodIngredients() {
         given()
                 .queryParam("language", "en")
                 .queryParam("apiKey", apiKey)
@@ -121,7 +121,7 @@ public class AppTestPost {
 
     }
 @Test
-    public void post5Negative(){
+    public void postFoodProductsNegative(){
 given()
         .queryParam("apiKey", apiKey)
         .queryParam("locale", "en_US")

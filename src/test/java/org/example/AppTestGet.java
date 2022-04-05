@@ -11,7 +11,7 @@ public class AppTestGet {
     private final String apiKey = "403374500dbd4d1bb8587033294d5bad";
 
     @Test
-    public void test1Positive() {
+    public void getComplexSearch() {
         JsonPath response = given()
                 .when()
                 .get("https://api.spoonacular.com/recipes/complexSearch?" +
@@ -23,7 +23,7 @@ public class AppTestGet {
     }
 
     @Test
-    public void test2Positive() {
+    public void getFoodIngredients() {
         JsonPath response = given()
                 .queryParam("apiKey", apiKey)
                 .queryParam("nutrient", "protein")
@@ -38,7 +38,7 @@ public class AppTestGet {
     }
 
     @Test
-    public void test3Positive() {
+    public void getRecipesInformation() {
         JsonPath response = given()
                 .queryParam("apiKey", apiKey)
                 .queryParam("includeNutrition", "false")
@@ -52,7 +52,7 @@ public class AppTestGet {
     }
 
     @Test
-    public void test4Negative() {
+    public void getTasteWidget() {
         JsonPath response = given()
                 .queryParam("apiKey", apiKey)
                 .queryParam("diet", "vegan")
@@ -66,7 +66,7 @@ public class AppTestGet {
     }
 
     @Test
-    public void test5Negative() {
+    public void getRecipesComplexSearchNegative() {
         given()
                 .queryParam("apiKey", apiKey)
                 .queryParam("query", "melon")
