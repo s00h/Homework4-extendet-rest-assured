@@ -1,19 +1,50 @@
 package org.example;
 
-import org.junit.Test;
+import io.restassured.RestAssured;
+import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.builder.ResponseSpecBuilder;
+import io.restassured.filter.log.LogDetail;
+import io.restassured.http.ContentType;
+import io.restassured.specification.RequestSpecification;
+import io.restassured.specification.ResponseSpecification;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 
 public class AppTestPost {
+
     private final String apiKey = "403374500dbd4d1bb8587033294d5bad";
+    private final String baseUri = "https://api.spoonacular.com/";
+    ResponseSpecification responseSpecification = null;
+    RequestSpecification requestSpecification = null;
+
+    @BeforeEach
+    void beforeTest() {
+        responseSpecification = new ResponseSpecBuilder()
+                .expectStatusCode(200)
+                .expectStatusLine("HTTP/1.1 200 OK")
+                .expectContentType(ContentType.JSON)
+                .expectResponseTime(Matchers.lessThan(7000L))
+                .build();
+
+        RestAssured.responseSpecification = responseSpecification;
+        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
+
+        requestSpecification = new RequestSpecBuilder()
+                .addQueryParam("apiKey", apiKey)
+                .setContentType(ContentType.JSON)
+                .log(LogDetail.ALL)
+                .build();
+    }
 
     @Test
     public void postMealplannerItems() {
         String id = given()
                 .queryParam("hash", "dc9601b2a37227f264b53fe6bfe8261d1415f14d")
-                .queryParam("apiKey", apiKey)
+                .spec(requestSpecification)
                 .body("{\n"
                         + " \"date\": 1644881179,\n"
                         + " \"slot\": 1,\n"
@@ -28,32 +59,29 @@ public class AppTestPost {
                         + " }\n"
                         + "}")
                 .when()
-                .post("https://api.spoonacular.com/mealplanner/myExample/items")
+                .post(baseUri + "mealplanner/myExample/items")
                 .then()
-                .statusCode(200)
+                .spec(responseSpecification)
                 .extract()
                 .jsonPath()
                 .get("id")
                 .toString();
         System.out.println("ID is: " + id);
-        given()
+        given().spec(requestSpecification)
                 .queryParam("hash", "dc9601b2a37227f264b53fe6bfe8261d1415f14d")
-                .queryParam("apiKey", apiKey)
-                .delete("https://api.spoonacular.com/mealplanner/myExample/items/" + id)
+                .delete(baseUri + "mealplanner/myExample/items/" + id)
                 .then()
-                .assertThat()
-                .statusCode(200)
+                .spec(responseSpecification)
                 .and()
                 .body("status", is("success"));
     }
 
     @Test
     public void postRecipesAnalyze() {
-        given()
+        given().spec(requestSpecification)
                 .queryParam("language", "en")
                 .queryParam("includeNutrition", "false")
                 .queryParam("includeTaste", "false")
-                .queryParam("apiKey", apiKey)
                 .body("{\n"
                         + " \"title\": \"Spaghetti Carbonara\",\n"
                         + " \"servings\": 2,\n"
@@ -67,21 +95,19 @@ public class AppTestPost {
                         + " \"instructions\": \"Bring a large pot of water to a boil and season generously with salt. Add the pasta to the water once boiling and cook until al dente. Reserve 2 cups of cooking water and drain the pasta.\" \n"
                         + "}")
                 .when()
-                .post("https://api.spoonacular.com/recipes/analyze")
+                .post(baseUri + "recipes/analyze")
                 .then()
-                .assertThat()
-                .statusCode(200)
+                .spec(responseSpecification)
                 .and()
                 .body("vegetarian", is(false));
     }
 
     @Test
     public void postRecipesCuisine() {
-        given()
+        given().spec(requestSpecification)
                 .queryParam("title", "Pork roast with green beans")
                 .queryParam("ingredientList", "3 oz pork shoulder")
                 .queryParam("language", "en")
-                .queryParam("apiKey", apiKey)
                 .body("{\n"
                         + " \"cuisine\": \"Mediterranean\",\n"
                         + " \"cuisines\": [ \n"
@@ -92,18 +118,17 @@ public class AppTestPost {
                         + " \"confidence\": \"0.0\" \n"
                         + "}")
                 .when()
-                .post("https://api.spoonacular.com/recipes/cuisine")
+                .post(baseUri + "recipes/cuisine")
                 .then()
-                .assertThat()
-                .statusCode(200)
+                .spec(responseSpecification)
                 .and()
                 .body("cuisine", is("Mediterranean"));
     }
+
     @Test
     public void postFoodIngredients() {
-        given()
+        given().spec(requestSpecification)
                 .queryParam("language", "en")
-                .queryParam("apiKey", apiKey)
                 .body("{\n"
                         + " \"ingredients\": [ \n"
                         + "         \"2 apples\",\n"
@@ -112,30 +137,22 @@ public class AppTestPost {
                         + " ], \n"
                         + "}")
                 .when()
-                .post("https://api.spoonacular.com/food/ingredients/glycemicLoad")
+                .post(baseUri + "food/ingredients/glycemicLoad")
                 .then()
-                .assertThat()
-                .statusCode(200)
+                .spec(responseSpecification)
                 .and()
                 .body("status", is("success"));
 
     }
-@Test
-    public void postFoodProductsNegative(){
-given()
-        .queryParam("apiKey", apiKey)
-        .queryParam("locale", "en_US")
-        .body( "[ \n"
-                + " { \n"
-                + " \"title\": \"Kroger Vitamin A & D Reduced Fat 2% Milk\" , \n"
-                + " \"upc\": \" \", \n"
-                + " \"plu_code\": \" \", \n"
-                + " },\n"
-        + "]")
-        .when()
-        .post("https://api.spoonacular.com/food/products/classify1Batch")
-        .then()
-        .assertThat()
-        .statusCode(405);
-   }
+
+    @Test
+    public void postFoodDetect(){
+        given().spec(requestSpecification)
+                .when()
+                .formParam("title", "I like to eat delicious tacos.")
+                .post(baseUri + "food/detect")
+                .then()
+                .spec(responseSpecification);
+
+    }
 }
