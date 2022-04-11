@@ -142,17 +142,15 @@ public class AppTestPost {
                 .spec(responseSpecification)
                 .and()
                 .body("status", is("success"));
-
     }
 
     @Test
-    public void postFoodDetect(){
+    public void postFoodDetect() {
         given().spec(requestSpecification)
                 .when()
                 .formParam("title", "I like to eat delicious tacos.")
                 .post(baseUri + "food/detect")
                 .then()
                 .spec(responseSpecification);
-
     }
 }
